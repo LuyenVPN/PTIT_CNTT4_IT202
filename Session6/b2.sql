@@ -1,5 +1,5 @@
-create database b1_s6;
-use b1_s6;
+create database b2_s6;
+use b2_s6;
 CREATE TABLE customers (
     customer_id INT PRIMARY KEY,
     full_name VARCHAR(255),
@@ -28,19 +28,36 @@ INSERT INTO orders (order_id, customer_id, order_date, status) VALUES
 (104, 3, '2025-01-06', 'cancelled'),
 (105, 4, '2025-01-07', 'pending');
 
-SELECT o.order_id, c.full_name, c.city, o.order_date, o.status
-FROM orders o
-JOIN customers c ON o.customer_id = c.customer_id;
+alter table orders
+add total_amount decimal(10,2);
 
-SELECT c.customer_id, c.full_name, COUNT(o.order_id) AS total_orders
-FROM customers c JOIN orders o ON c.customer_id = o.customer_id
-GROUP BY c.customer_id, c.full_name;
+update orders set total_amount = 5500000 where order_id = 101;
+update orders set total_amount = 4800000 where order_id = 102;
+update orders set total_amount = 6200000 where order_id = 103;
+update orders set total_amount = 3500000 where order_id = 104;
+update orders set total_amount = 7000000 where order_id = 105;
 
 select
     c.customer_id,
     c.full_name,
-    count(o.order_id) as total_orders
+    sum(o.total_amount) as total_spent
+from customers c
+join orders o on c.customer_id = o.customer_id
+group by c.customer_id, c.full_name;
+
+select
+    c.customer_id,
+    c.full_name,
+    max(o.total_amount) as max_order_value
+from customers c
+join orders o on c.customer_id = o.customer_id
+group by c.customer_id, c.full_name;
+
+select
+    c.customer_id,
+    c.full_name,
+    sum(o.total_amount) as total_spent
 from customers c
 join orders o on c.customer_id = o.customer_id
 group by c.customer_id, c.full_name
-having count(o.order_id) >= 1;
+order by total_spent desc;
